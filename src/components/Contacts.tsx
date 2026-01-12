@@ -10,7 +10,7 @@ import { useGlobalContext } from "@/helper/globalContextHook"
 const Contacts = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { backendUrl, token, setChatRoomIds } = useGlobalContext();
+  const { backendUrl, token, setChatRooms } = useGlobalContext();
 
   // Sample contacts data - replace with actual API data
   const contacts = [
@@ -29,11 +29,11 @@ const Contacts = () => {
         }
       });
       if (response.status === 200) {
-        const { chatRoomId } = response.data;
+        const { chatRoom } = response.data;
 
-        setChatRoomIds((prev) => {
-          if (prev.includes(chatRoomId)) return prev;
-          return [...prev, chatRoomId];
+        setChatRooms((prev) => {
+          if (prev.includes(chatRoom._id)) return prev;
+          return [...prev, chatRoom._id];
         });
     }
     } catch (error) {
