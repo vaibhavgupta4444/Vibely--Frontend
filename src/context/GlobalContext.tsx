@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
 import type { NavigateFunction } from "react-router-dom";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 type TReceiver = {
   firstName: string;
@@ -23,13 +24,17 @@ type ChatRoom = {
   latestMessage: TLatestMessage
 };
 
+
 interface GlobalContextType {
   navigate: NavigateFunction;
   backendUrl: string;
   token: string | null;
   setToken: React.Dispatch<React.SetStateAction<string | null>>;
   chatRooms: ChatRoom[];
-  setChatRooms: React.Dispatch<React.SetStateAction<ChatRoom[]>>
+  setChatRooms: React.Dispatch<React.SetStateAction<ChatRoom[]>>;
+  selectedChatRoom: ChatRoom | null;
+  setSelectedChatRoom: React.Dispatch<React.SetStateAction<ChatRoom | null>>;
+  currentUser: string | null;
 }
 
 interface ShopContextProviderProps {
@@ -45,6 +50,26 @@ const GlobalContextProvider = ({ children }: ShopContextProviderProps) => {
   const navigate = useNavigate();
   const [token, setToken] = useState<string | null>(null);
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
+  const [selectedChatRoom, setSelectedChatRoom] = useState<ChatRoom | null>(null);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
+
+  // Decode user from token
+  useEffect(() => {
+    if (token) {
+      try {
+        const decoded = jwtDecode<any>(token);
+        // console.log("Full decoded token:", decoded);
+        
+        const userId = decoded.id;
+        setCurrentUser(userId as string);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        setCurrentUser(null);
+      }
+    } else {
+      setCurrentUser(null);
+    }
+  }, [token]);
 
   const getChatRooms = async (token: string | null) => {
     try {
@@ -83,7 +108,10 @@ const GlobalContextProvider = ({ children }: ShopContextProviderProps) => {
     token,
     setToken,
     chatRooms,
-    setChatRooms
+    setChatRooms,
+    selectedChatRoom,
+    setSelectedChatRoom,
+    currentUser
   };
 
   return (

@@ -10,14 +10,13 @@ import { useGlobalContext } from "@/helper/globalContextHook"
 const Contacts = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { backendUrl, token, setChatRooms } = useGlobalContext();
+  const { backendUrl, token, setChatRooms, chatRooms, setSelectedChatRoom } = useGlobalContext();
+  
+  const contacts = chatRooms || [];
 
-  // Sample contacts data - replace with actual API data
-  const contacts = [
-    { id: "1", name: "John Doe", email: "john@example.com", lastMessage: "Hey there!", unread: 2 },
-    { id: "2", name: "Jane Smith", email: "jane@example.com", lastMessage: "See you tomorrow", unread: 0 },
-    { id: "3", name: "Mike Johnson", email: "mike@example.com", lastMessage: "Thanks!", unread: 1 },
-  ];
+  const handleContactClick = (chatRoom: typeof contacts[0]) => {
+    setSelectedChatRoom(chatRoom);
+  };
 
   const findFriend = async () => {
     try {
@@ -75,42 +74,51 @@ const Contacts = () => {
 
       {/* Contacts List */}
       <div className="flex-1 overflow-y-auto">
-        {contacts.length === 0 ? ( //ignore it
+        {contacts.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-400">
             <p className="text-sm">No contacts found</p>
           </div>
         ) : (
-          contacts.map((contact) => ( //ignore it
-            <div
-              key={contact.id}
-              className="p-4 border-b hover:bg-gray-50 cursor-pointer transition-colors"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    {/* Avatar */}
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                      {contact.name.charAt(0).toUpperCase()}
-                    </div>
-
-                    {/* Contact Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-sm truncate">{contact.name}</h3>
-                        {contact.unread > 0 && (
-                          <span className="ml-2 bg-blue-500 text-white text-xs rounded-full px-2 py-0.5 flex-shrink-0">
-                            {contact.unread}
-                          </span>
-                        )}
+          contacts.map((contact) => {
+            const receiver = contact.receivers[0]; // Get first receiver
+            const fullName = `${receiver.firstName} ${receiver.lastName}`;
+            const unreadCount = !contact.latestMessage.isRead ? 1 : 0;
+            
+            return (
+              <div
+                key={contact.id}
+                onClick={() => handleContactClick(contact)}
+                className="p-4 border-b hover:bg-gray-50 cursor-pointer transition-colors"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      {/* Avatar */}
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                        {receiver.firstName.charAt(0).toUpperCase()}
                       </div>
-                      <p className="text-xs text-gray-500 truncate">{contact.email}</p>
-                      <p className="text-sm text-gray-600 truncate mt-1">{contact.lastMessage}</p>
+
+                      {/* Contact Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold text-sm truncate">{fullName}</h3>
+                          {unreadCount > 0 && (
+                            <span className="ml-2 bg-blue-500 text-white text-xs rounded-full px-2 py-0.5 flex-shrink-0">
+                              {unreadCount}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 truncate">{receiver.email}</p>
+                        <p className="text-sm text-gray-600 truncate mt-1">
+                          {contact.latestMessage.content || "No messages yet"}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

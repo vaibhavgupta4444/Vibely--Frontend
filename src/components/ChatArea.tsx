@@ -5,10 +5,12 @@ interface Message {
   sender: {
     _id: string;
     email: string;
+    name: string;
   };
   receiver: {
     _id: string;
     email: string;
+    name: string;
   };
   content: string;
   isRead: boolean;
@@ -55,7 +57,7 @@ const ChatArea = ({ messages, currentUserId }: ChatAreaProps) => {
                   }`}
                 >
                   <p className="text-sm font-semibold mb-1">
-                    {msg.sender.email}
+                    {isSentByCurrentUser ? "" : msg.sender.name}
                   </p>
                   <p className="text-sm">{msg.content}</p>
                   <p className="text-xs mt-1 opacity-70">

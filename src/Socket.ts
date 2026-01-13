@@ -9,10 +9,12 @@ export interface ServerToClientEvents {
     sender: {
       _id: string;
       email: string;
+      name: string;
     };
     receiver: {
       _id: string;
       email: string;
+      name: string;
     };
     content: string;
     isRead: boolean;
@@ -28,6 +30,7 @@ export interface ClientToServerEvents {
     receiver: string;
     content: string;
   }) => void;
+  join: (userId: string) => void;
 }
 
 export const socket: Socket<
